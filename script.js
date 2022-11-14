@@ -17,10 +17,27 @@ const clearCompleteTasksButton = document.querySelector(
 
 const LOCAL_STORAGE_LIST_KEY = 'task.lists';
 const LOCAL_STORAGE_SELECTED_LIST_ID_KEY = 'task.selectedListId';
-
 let lists = JSON.parse(localStorage.getItem(LOCAL_STORAGE_LIST_KEY)) || [];
-
 let selectedListId = localStorage.getItem(LOCAL_STORAGE_SELECTED_LIST_ID_KEY);
+
+listsContainer.addEventListener('click', (e) => {
+  if (e.target.tagName.toLowerCase() === 'li') {
+    selectedListId = e.target.dataset.listId;
+    saveAndRender();
+  }
+});
+
+tasksContainer.addEventListener('click', (e) => {
+  if (e.target.tagName.toLowerCase() === 'input') {
+    const selectedList = lists.find((list) => list.id === selectedListId);
+    const selectedTask = selectedList.tasks.find(
+      (task) => task.id === e.target.id
+    );
+    selectedTask.complete = e.target.checked;
+    save();
+    renderTaskCount(selectedList);
+  }
+});
 
 clearCompleteTasksButton.addEventListener('click', (e) => {
   const selectedList = lists.find((list) => list.id === selectedListId);
@@ -55,38 +72,12 @@ newTaskForm.addEventListener('submit', (e) => {
   saveAndRender();
 });
 
-listsContainer.addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'li') {
-    selectedListId = e.target.dataset.listId;
-    saveAndRender();
-  }
-});
-
-tasksContainer.addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'input') {
-    const selectedList = lists.find((list) => list.id === selectedListId);
-    const selectedTask = selectedList.tasks.find(
-      (task) => task.id === e.target.id
-    );
-    selectedTask.complete = e.target.checked;
-    save();
-    renderTaskCount(selectedList);
-  }
-});
-
 function createList(name) {
-  return {
-    id: Date.now().toString(),
-    name: name,
-    tasks: [],
-  };
+  return { id: Date.now().toString(), name: name, tasks: [] };
 }
+
 function createTask(name) {
-  return {
-    id: Date.now().toString(),
-    name: name,
-    complete: false,
-  };
+  return { id: Date.now().toString(), name: name, complete: false };
 }
 
 function saveAndRender() {
@@ -104,8 +95,7 @@ function render() {
   renderLists();
 
   const selectedList = lists.find((list) => list.id === selectedListId);
-
-  if (selectedListId === null) {
+  if (selectedListId == null) {
     listDisplayContainer.style.display = 'none';
   } else {
     listDisplayContainer.style.display = '';
@@ -146,7 +136,6 @@ function renderLists() {
     if (list.id === selectedListId) {
       listElement.classList.add('active-list');
     }
-
     listsContainer.appendChild(listElement);
   });
 }
